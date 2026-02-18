@@ -1,21 +1,37 @@
-# 💻 Java CLI Template
+# Read the news
 
-Starter template for building and releasing Java CLI apps (JAR + native binary).
-
-## Use This Template
-
-1. Click [**Use this template**](https://github.com/nukesz/java-cli-template/generate).
-2. Create your new repository.
-3. Update:
-- `settings.gradle` (`rootProject.name`)
-- `build.gradle` (`group`, `version`)
-- `src/main/java/org/example/Main.java`
+Small Java CLI that fetches recent headlines from a few RSS feeds and gives a quick digest by period.
 
 ## Quick Start
 
 ```bash
-./gradlew run
+./jnews --today
 ```
+
+## Usage
+
+```bash
+./jnews [--today|--week|--month|--since-last] [--topic <name>]... [--show <index>] [--save-topics] [--clear-saved-topics]
+```
+
+Examples:
+
+```bash
+./jnews --week
+./jnews --week --topic ai --topic politics
+./jnews --week --show 2
+./jnews --month --topic business --save-topics
+./jnews --since-last
+```
+
+## Notes
+
+- Defaults to `--today` when no period flag is provided.
+- Use `--show <index>` to render a headline's article text directly in terminal.
+- If a site blocks full extraction, `--show` falls back to the RSS summary text.
+- Saved state lives in `~/.jnews.properties`.
+  - `last_run`: used by `--since-last`
+  - `saved_topics`: used automatically when no `--topic` is passed
 
 ## Release Output
 
