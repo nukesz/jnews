@@ -8,6 +8,16 @@ Small Java CLI that fetches recent headlines from a few RSS feeds and gives a qu
 ./jnews --today
 ```
 
+## Download
+
+Download the `jnews` binary from GitHub Releases before running commands:
+
+```bash
+curl -fL -o jnews "https://github.com/nukesz/jnews/releases/latest/download/jnews-linux-amd64"
+chmod +x jnews
+./jnews --today
+```
+
 ## Usage
 
 ```bash
@@ -34,24 +44,7 @@ Examples:
   - `last_run`: used by `--since-last`
   - `saved_topics`: used automatically when no `--topic` is passed
 
-## Release Output
-
-Tag a version (for example `v0.1.0`) to trigger the release workflow:
-
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-Your users can then download native binaries from:
-`https://github.com/<your-org>/<your-repo>/releases`
-
-Example (Linux/macOS):
-
-```bash
-curl -fL -o <your-app-name> "https://github.com/<your-org>/<your-repo>/releases/latest/download/<your-app-name>-linux-amd64"
-chmod +x <your-app-name>
-./<your-app-name>
-```
+Download native binaries from:
+`https://github.com/nukesz/jnews/releases`
 
 Contributor/build details: `CONTRIBUTING.md`.
