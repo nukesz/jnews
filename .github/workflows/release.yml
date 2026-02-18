@@ -30,8 +30,8 @@ jobs:
         run: |
           mkdir -p dist
           cp build/libs/*.jar dist/
-          cp build/native/nativeCompile/java-cli-template dist/java-cli-template-linux-amd64
-          chmod +x dist/java-cli-template-linux-amd64
+          cp build/native/nativeCompile/jnews dist/jnews-linux-amd64
+          chmod +x dist/jnews-linux-amd64
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

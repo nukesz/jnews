@@ -4,7 +4,7 @@ Thanks for contributing.
 
 ## Prerequisites
 
-- JDK 17+ installed
+- JDK 21+ installed
 - Gradle wrapper (included in this repository)
 - GraalVM only if you plan to build the native binary
 
@@ -37,7 +37,7 @@ Run tests:
 This project uses the GraalVM Native Build Tools Gradle plugin.
 
 Native binary output:
-- `build/native/nativeCompile/java-cli-template`
+- `build/native/nativeCompile/jnews`
 
 ## CI and Release
 
