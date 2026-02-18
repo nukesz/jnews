@@ -1,4 +1,4 @@
-# Read the news
+# 🌍 Read the news
 
 Small Java CLI that fetches recent headlines from a few RSS feeds and gives a quick digest by period.
 
@@ -29,6 +29,7 @@ Examples:
 - Defaults to `--today` when no period flag is provided.
 - Use `--show <index>` to render a headline's article text directly in terminal.
 - If a site blocks full extraction, `--show` falls back to the RSS summary text.
+- During local development, run with Gradle: `./gradlew -q run --args='--today'`.
 - Saved state lives in `~/.jnews.properties`.
   - `last_run`: used by `--since-last`
   - `saved_topics`: used automatically when no `--topic` is passed

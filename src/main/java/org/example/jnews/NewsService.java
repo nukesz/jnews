@@ -4,6 +4,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
@@ -29,14 +32,26 @@ public class NewsService {
     private static final List<FeedSource> FEEDS = List.of(
             new FeedSource("BBC World", URI.create("https://feeds.bbci.co.uk/news/world/rss.xml")),
             new FeedSource("NPR", URI.create("https://feeds.npr.org/1001/rss.xml")),
-            new FeedSource("NYTimes Home", URI.create("https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"))
+            new FeedSource("NYTimes Home", URI.create("https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml")),
+            new FeedSource("CNN Top Stories", URI.create("http://rss.cnn.com/rss/edition.rss")),
+            new FeedSource("Fox News Latest", URI.create("https://moxie.foxnews.com/google-publisher/latest.xml")),
+            new FeedSource("The Guardian World", URI.create("https://www.theguardian.com/world/rss")),
+            new FeedSource("Al Jazeera", URI.create("https://www.aljazeera.com/xml/rss/all.xml")),
+            new FeedSource("ABC News Top", URI.create("https://abcnews.go.com/abcnews/topstories")),
+            new FeedSource("CBS News Latest", URI.create("https://www.cbsnews.com/latest/rss/main")),
+            new FeedSource("CNBC Top News", URI.create("https://www.cnbc.com/id/100003114/device/rss/rss.html")),
+            new FeedSource("WSJ World", URI.create("https://feeds.a.dj.com/rss/RSSWorldNews.xml")),
+            new FeedSource("Politico Picks", URI.create("https://www.politico.com/rss/politicopicks.xml"))
     );
 
     private final HttpClient client;
     private final TopicClassifier topicClassifier;
 
     public NewsService(TopicClassifier topicClassifier) {
-        this.client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(8)).build();
+        this.client = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(8))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build();
         this.topicClassifier = topicClassifier;
     }
 
@@ -49,6 +64,7 @@ public class NewsService {
                 HttpRequest request = HttpRequest.newBuilder(feed.uri())
                         .timeout(Duration.ofSeconds(12))
                         .header("User-Agent", "jnews/0.1")
+                        .header("Accept", "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8")
                         .GET()
                         .build();
                 HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -70,7 +86,7 @@ public class NewsService {
                     }
                 }
             } catch (Exception e) {
-                System.err.printf("Skipping %s: %s%n", feed.name(), e.getMessage());
+                System.err.printf("Skipping %s: %s%n", feed.name(), describeError(e));
             }
         }
 
@@ -86,8 +102,28 @@ public class NewsService {
     private List<Article> parseRss(InputStream in, String sourceName) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(false);
-        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        Document doc = factory.newDocumentBuilder().parse(in);
+        factory.setXIncludeAware(false);
+        factory.setExpandEntityReferences(false);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        var builder = factory.newDocumentBuilder();
+        builder.setErrorHandler(new DefaultHandler() {
+            @Override
+            public void warning(SAXParseException e) {
+            }
+
+            @Override
+            public void error(SAXParseException e) throws SAXException {
+                throw e;
+            }
+
+            @Override
+            public void fatalError(SAXParseException e) throws SAXException {
+                throw e;
+            }
+        });
+        Document doc = builder.parse(in);
         NodeList items = doc.getElementsByTagName("item");
         List<Article> out = new ArrayList<>();
 
@@ -148,5 +184,17 @@ public class NewsService {
         } catch (DateTimeParseException ignored) {
             return Optional.empty();
         }
+    }
+
+    private String describeError(Exception e) {
+        String msg = e.getMessage();
+        if (msg != null && !msg.isBlank()) {
+            return msg;
+        }
+        Throwable cause = e.getCause();
+        if (cause != null && cause.getMessage() != null && !cause.getMessage().isBlank()) {
+            return cause.getClass().getSimpleName() + ": " + cause.getMessage();
+        }
+        return e.getClass().getSimpleName();
     }
 }
