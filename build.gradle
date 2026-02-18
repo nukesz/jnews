@@ -1,0 +1,35 @@
+plugins {
+    id 'application'
+    id 'org.graalvm.buildtools.native' version '0.10.3'
+}
+
+group = 'org.example'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+application {
+    mainClass = 'org.example.Main'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+graalvmNative {
+    toolchainDetection = false
+    binaries {
+        main {
+            javaLauncher = javaToolchains.launcherFor {
+                languageVersion = JavaLanguageVersion.of(JavaVersion.current().majorVersion.toInteger())
+            }
+        }
+    }
+}
